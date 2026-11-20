@@ -28,7 +28,7 @@ http.createServer((q,r)=>{
   if(u[4]==="restart"){restart(b);return j({ok:1})}
   if(u[4]==="timed"){const m=+body;if(!(m>0))return j({ok:0});start(b,"شُغّل لمدة "+m+" د");clearTimeout(b.timer);b.until=Date.now()+m*6e4;b.timer=setTimeout(()=>{stop(b,true);ev("انتهت مدة البوت "+b.n)},m*6e4);return j({ok:1})}
   r.statusCode=404;r.end()});
-}).listen(3000,"127.0.0.1",()=>console.log("Panel: http://localhost:3000"));
+}).listen(process.env.PORT||3000,"0.0.0.0",()=>console.log("Panel: http://localhost:3000"));
 process.on("SIGINT",()=>process.exit());
 process.on("exit",()=>Object.values(bots).forEach(b=>b.p&&b.p.kill()));
 const AUTO_H=+process.env.AUTO_H||3;
