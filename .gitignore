@@ -1,0 +1,4 @@
+node_modules/
+bots/*/accounts/
+bots/*/data/
+bots/*/fb_dtsg_data.json
