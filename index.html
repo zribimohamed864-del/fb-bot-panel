@@ -16,7 +16,7 @@ nav div{flex:1;text-align:center;padding:14px;color:#888}nav .a{color:#1b8a5a;fo
 <div id="view"></div>
 <nav><div id="t0" class="a" onclick="tab(0)">الرئيسية</div><div id="t1" onclick="tab(1)">السجل</div><div id="t2" onclick="tab(2)">الربط</div></nav>
 <script>
-var P=localStorage.pp||prompt("كلمة السر"),T=0,D=[],E=[],op={};
+var P=localStorage.pp||prompt("كلمة السر"),T=0,D=[],E=[],op={},ckVal={};
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
 function ago(t){if(!t)return"—";var s=Math.floor((Date.now()-t)/1000),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return(d?d+" يوم ":"")+(h?h+" س ":"")+m+" د"}
 function api(u,m,b){return fetch(u,{method:m||"GET",headers:{Authorization:P},body:b}).then(function(r){if(r.status==401){localStorage.removeItem("pp");alert("كلمة سر خاطئة");location.reload();return}localStorage.pp=P;return r.json()})}
@@ -24,7 +24,7 @@ function R(){var h="";
 if(T==0)D.forEach(function(b,i){h+=`<div class="card"><div class="h"><div class="n">${b.n}</div><b>البوت ${b.n}</b><span class="st ${b.on?"on":"off"}">● ${b.on?"يعمل":"متوقف"}</span></div>
 <div class="info">مدة التشغيل: ${b.on?ago(b.since):"—"}<br>آخر إيقاف من اللوحة: ${b.stopped?"منذ "+ago(b.stopped):"—"}${b.until?"<br>يتوقف بعد: "+Math.max(0,Math.ceil((b.until-Date.now())/60000))+" د":""}</div>
 <div class="b"><button class="g" onclick="a(${i},'start')">▶ تشغيل</button><button class="w" onclick="a(${i},'stop')">■ إيقاف</button><button onclick="a(${i},'restart')">↻ إعادة تشغيل</button><button onclick="tm(${i})">⏱ تشغيل بمدة</button></div>
-<div style="margin-top:10px"><textarea id="ck${i}" placeholder="الصق كوكيز الحساب هنا (JSON)" style="width:100%;box-sizing:border-box;height:70px;border-radius:10px;border:1px solid #ccc;padding:8px;font-size:12px"></textarea></div>
+<div style="margin-top:10px"><textarea id="ck${i}" oninput="ckVal[${i}]=this.value" placeholder="الصق كوكيز الحساب هنا (JSON)" style="width:100%;box-sizing:border-box;height:70px;border-radius:10px;border:1px solid #ccc;padding:8px;font-size:12px">${esc(ckVal[i]||"")}</textarea></div>
 <div class="b" style="margin-top:6px"><button class="g" onclick="saveCookie(${i})">💾 حفظ الكوكيز</button></div>
 <p onclick="op[${i}]=!op[${i}];R()" style="color:#888;font-size:13px">سجل البوت ⌄</p>${op[i]?"<pre>"+esc(b.logs.join("\n"))+"</pre>":""}</div>`});
 if(T==1)h='<div class="card"><pre>'+esc(E.join("\n"))+'</pre></div>';
@@ -35,6 +35,6 @@ function L(){Promise.all([api("/api/bots"),api("/api/events")]).then(function(r)
 function a(i,x){api("/api/bots/"+D[i].id+"/"+x,"POST").then(L)}
 function tm(i){var m=prompt("كم دقيقة؟");if(m&&+m>0)api("/api/bots/"+D[i].id+"/timed","POST",m).then(L)}
 function saveCookie(i){var t=document.getElementById("ck"+i),v=t.value.trim();if(!v){alert("الصق الكوكيز أولاً");return}
-api("/api/bots/"+D[i].id+"/cookie","POST",v).then(function(res){if(res&&res.ok){alert("تم حفظ الكوكيز بنجاح ✅ اضغط تشغيل الآن");t.value="";L()}else alert("كوكيز غير صالحة، تأكد إنها نسخة JSON كاملة وصحيحة")})}
+api("/api/bots/"+D[i].id+"/cookie","POST",v).then(function(res){if(res&&res.ok){alert("تم حفظ الكوكيز بنجاح ✅ اضغط تشغيل الآن");t.value="";ckVal[i]="";L()}else alert("كوكيز غير صالحة، تأكد إنها نسخة JSON كاملة وصحيحة")})}
 setInterval(L,3000);L();
 </script></body></html>
