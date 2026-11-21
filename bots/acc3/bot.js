@@ -8,23 +8,30 @@ const OWNER = ADMINS[0];
 
 const DBLACK_MSG = "👁️🪐 𝗗 𝗕𝗟𝗔𝗖𝗞 🪐👁️\n🧿✨ 𝕯 ⚡ 𝕭𝕷𝕬𝕮𝕶 ✨🧿";
 const HELP = [
-  "🪐━━━━━━━━━━━━━━━━━━━🪐",
-  "   👁️ ⟦ 𝐂𝐎𝐌𝐌𝐀𝐍𝐃𝐒 • الأوامر ⟧ 👁️",
-  "🪐━━━━━━━━━━━━━━━━━━━🪐",
-  "🧿 ديبلاك + الوقت + الرسالة 🪐",
-  "⏱️ مثال: ديبلاك 50ث مرحبا ⟵ كل 50 ثانية",
-  "⏱️ مثال: ديبلاك 5د مرحبا ⟵ كل 5 دقائق",
-  "🧿 ديبلاك ايقاف ⟵ إيقافها ⛔",
-  "👁️ اسم + الاسم ⟵ قفل اسم الجروب 🔒",
-  "👁️ فتح اسم ⟵ فك القفل 🔓",
-  "🪐 كنية + الكنية ⟵ قفل كل الكنيات 🔒",
-  "🪐 فتح كنية ⟵ فك قفل الكنيات 🔓",
-  "🧹 مسح كنية ⟵ يمسح كنيات الجميع",
-  "👑 ملك ⟵ رد على رسالة شخص ليصير أدمن في البوت",
-  "🚪 سحب ملك ⟵ رد على رسالته لسحب صلاحياته",
-  "📊 حالة ⟵ يعرض الحسابات الشغالة",
-  "🗑️ مسح ⟵ رد على رسالة البوت لحذفها",
-  "🪐━━━━━━━━━━━━━━━━━━━🪐",
+  "✦･ﾟ:*✦･ﾟ:* 👑 𝐌𝐘𝐒𝐓𝐈𝐂 𝐁𝐎𝐓 👑 *:･ﾟ✦*:･ﾟ✦",
+  "┏━━━━━━━━━━━━━━━━━━━━━━┓",
+  "┃  👁️ ⟦ 𝐂𝐎𝐌𝐌𝐀𝐍𝐃𝐒 • الأوامر ⟧ 👁️  ┃",
+  "┗━━━━━━━━━━━━━━━━━━━━━━┛",
+  "",
+  "🧿 ꔷ ديبلاك + الوقت + الرسالة 🪐",
+  "   ⤷ ديبلاك 50ث مرحبا  ⟶ ثابت كل 50 ثانية",
+  "   ⤷ ديبلاك 5ث 10ث مرحبا  ⟶ عشوائي بين 5-10 ثواني",
+  "   ⤷ ديبلاك 5د 10د مرحبا  ⟶ عشوائي بين 5-10 دقائق",
+  "   ⤷ ديبلاك ايقاف  ⟶ إيقافها ⛔",
+  "",
+  "👁️ ꔷ اسم + الاسم  ⟶ قفل اسم الجروب 🔒",
+  "👁️ ꔷ فتح اسم  ⟶ فك القفل 🔓",
+  "",
+  "🪐 ꔷ كنية + الكنية  ⟶ قفل كل الكنيات 🔒",
+  "🪐 ꔷ فتح كنية  ⟶ فك قفل الكنيات 🔓",
+  "🧹 ꔷ مسح كنية  ⟶ يمسح كنية من عنده كنية فقط",
+  "",
+  "👑 ꔷ ملك  ⟶ رد على رسالة شخص ليصير أدمن في البوت",
+  "🚪 ꔷ سحب ملك  ⟶ رد على رسالته لسحب صلاحياته",
+  "📊 ꔷ حالة  ⟶ يعرض الحسابات الشغالة",
+  "🗑️ ꔷ مسح  ⟶ رد على رسالة البوت لحذفها",
+  "",
+  "✦･ﾟ:*✦･ﾟ:*━━━━━━━━━━*:･ﾟ✦*:･ﾟ✦",
 ].join("\n");
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -200,8 +207,13 @@ function startDblack(acc, t, now) {
   clear(acc, "d" + t);
   const d = acc.st.dblack[t];
   if (!d || typeof d !== "object") return;
+  const min = d.min || d.sec || 120, max = d.max || d.sec || 120;
+  const next = () => {
+    const wait = min >= max ? min : (min + Math.floor(Math.random() * (max - min + 1)));
+    acc.timers["d" + t] = setTimeout(() => { say(acc, t, d.msg, 1500); next(); }, wait * 1000);
+  };
   if (now) say(acc, t, d.msg);
-  acc.timers["d" + t] = setInterval(() => say(acc, t, d.msg, 1500), d.sec * 1000);
+  next();
 }
 async function fixName(acc, t) {
   acc.fx = acc.fx || {};
@@ -226,30 +238,42 @@ async function fixName(acc, t) {
 }
 function startName(acc, t) {
   clear(acc, "n" + t);
-  acc.timers["n" + t] = setInterval(async () => {
-    if (!acc.api || !acc.st.name[t] || (acc.fx && acc.fx[t])) return;
-    const i = await getInfo(acc, t);
-    if (i && i.threadName !== acc.st.name[t]) fixName(acc, t);
-  }, 2000);
+  const next = () => {
+    const wait = 2000 + Math.floor(Math.random() * 2001);
+    acc.timers["n" + t] = setTimeout(async () => {
+      if (acc.api && acc.st.name[t] && !(acc.fx && acc.fx[t])) {
+        const i = await getInfo(acc, t);
+        if (i && i.threadName !== acc.st.name[t]) fixName(acc, t);
+      }
+      next();
+    }, wait);
+  };
+  next();
 }
 function startNick(acc, t) {
   clear(acc, "k" + t);
   let busy = false;
-  acc.timers["k" + t] = setInterval(async () => {
-    if (busy || !acc.api) return;
-    busy = true;
-    try {
-      const i = await getInfo(acc, t);
-      if (i) for (const [uid, nick] of Object.entries(acc.st.nick[t] || {})) {
-        if (!acc.st.nick[t]) break;
-        if (((i.nicknames || {})[uid] || "") !== nick) {
-          await nickRaw(acc, t, uid, nick);
-          await sleep(10000);
-        }
+  const next = () => {
+    const wait = 2000 + Math.floor(Math.random() * 2001);
+    acc.timers["k" + t] = setTimeout(async () => {
+      if (!busy && acc.api) {
+        busy = true;
+        try {
+          const i = await getInfo(acc, t);
+          if (i) for (const [uid, nick] of Object.entries(acc.st.nick[t] || {})) {
+            if (!acc.st.nick[t]) break;
+            if (((i.nicknames || {})[uid] || "") !== nick) {
+              await nickRaw(acc, t, uid, nick);
+              await sleep(10000);
+            }
+          }
+        } catch {}
+        busy = false;
       }
-    } catch {}
-    busy = false;
-  }, 5000);
+      next();
+    }, wait);
+  };
+  next();
 }
 function restore(acc) {
   for (const t in acc.st.dblack) startDblack(acc, t, false);
@@ -322,7 +346,7 @@ async function handle(acc, ev) {
     say(acc, t, "جاري مسح الكنيات 🧹 (" + ids.length + " عضو)، ياخذ وقت لحماية الحساب");
     (async () => {
       let ok = 0;
-      for (const u of ids) { if (await nickRaw(acc, t, String(u), "")) ok++; await sleep(10000 + Math.random() * 3000); }
+      for (const u of ids) { if (await nickRaw(acc, t, String(u), "")) ok++; await sleep(1500); }
       say(acc, t, "تم مسح الكنيات ✅ (" + ok + "/" + ids.length + ")");
     })();
     return;
@@ -338,16 +362,24 @@ async function handle(acc, ev) {
       return say(acc, t, "تم إيقاف ديبلاك ⛔");
     }
     if (running) return say(acc, t, "ديبلاك راه يشتغل ✅");
-    const tm = rest.match(/(?:^|\s)(\d+)\s*(ثانية|ثواني|ثا|ث|دقيقة|دقائق|دقيقه|دق|د|s|sec|m|min)(?=\s|$)/i);
-    let sec = 120, msg = rest;
-    if (tm) {
-      const n = parseInt(tm[1], 10);
-      sec = /^(د|دق|دقيقة|دقائق|دقيقه|m|min)$/i.test(tm[2]) ? n * 60 : n;
-      msg = rest.replace(tm[0], " ").trim();
+    const unitRe = "(ثانية|ثواني|ثا|ث|دقيقة|دقائق|دقيقه|دق|د|s|sec|m|min)";
+    const toSec = (n, u) => /^(د|دق|دقيقة|دقائق|دقيقه|m|min)$/i.test(u) ? n * 60 : n;
+    const two = rest.match(new RegExp("^\\s*(\\d+)\\s*" + unitRe + "\\s+(\\d+)\\s*" + unitRe + "(?:\\s+([\\s\\S]*))?$", "i"));
+    const one = rest.match(new RegExp("^\\s*(\\d+)\\s*" + unitRe + "(?:\\s+([\\s\\S]*))?$", "i"));
+    let min = 120, max = 120, msg = rest;
+    if (two) {
+      min = toSec(parseInt(two[1], 10), two[2]);
+      max = toSec(parseInt(two[3], 10), two[4]);
+      if (min > max) { const x = min; min = max; max = x; }
+      msg = (two[5] || "").trim();
+    } else if (one) {
+      min = max = toSec(parseInt(one[1], 10), one[2]);
+      msg = (one[3] || "").trim();
     }
-    if (sec < 5) sec = 5;
-    if (!msg) return say(acc, t, "اكتب الرسالة بعد الأمر، مثال: ديبلاك 50ث رسالتي");
-    acc.st.dblack[t] = { msg, sec }; save(acc);
+    if (min < 5) min = 5;
+    if (max < 5) max = 5;
+    if (!msg) return say(acc, t, "اكتب الرسالة بعد الأمر، مثال: ديبلاك 5ث 10ث رسالتي");
+    acc.st.dblack[t] = { msg, min, max }; save(acc);
     await say(acc, t, "تم تشغيل ديبلاك 🪐");
     return startDblack(acc, t, true);
   }
