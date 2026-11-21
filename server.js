@@ -26,6 +26,17 @@ http.createServer((q,r)=>{
   if(u[4]==="start"){start(b,"شُغّل من اللوحة");return j({ok:1})}
   if(u[4]==="stop"){stop(b,true);ev("البوت "+b.n+" أُوقف من اللوحة");return j({ok:1})}
   if(u[4]==="restart"){restart(b);return j({ok:1})}
+  if(u[4]==="cookie"){
+   try{
+    const arr=JSON.parse(body);
+    if(!Array.isArray(arr)||!arr.length)throw new Error("empty");
+    const dir=path.join(b.dir,"accounts");
+    if(!fs.existsSync(dir))fs.mkdirSync(dir,{recursive:true});
+    fs.writeFileSync(path.join(dir,b.id+".json"),JSON.stringify(arr));
+    ev("تم حفظ كوكيز البوت "+b.n);
+    return j({ok:1})
+   }catch(e){return j({ok:0,error:"كوكيز غير صالحة"})}
+  }
   if(u[4]==="timed"){const m=+body;if(!(m>0))return j({ok:0});start(b,"شُغّل لمدة "+m+" د");clearTimeout(b.timer);b.until=Date.now()+m*6e4;b.timer=setTimeout(()=>{stop(b,true);ev("انتهت مدة البوت "+b.n)},m*6e4);return j({ok:1})}
   r.statusCode=404;r.end()});
 }).listen(process.env.PORT||3000,"0.0.0.0",()=>console.log("Panel: http://localhost:3000"));
